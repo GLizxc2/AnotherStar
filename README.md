@@ -1,2 +1,2 @@
-# AnotherStarAntiCheat
-Minecraft·´×÷±×
+ï»¿# AnotherStarAntiCheat
+Minecraftåä½œå¼Š
