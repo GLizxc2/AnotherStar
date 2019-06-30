@@ -1,71 +1,57 @@
 package com.anotherstar.anticheat;
 
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Set;
+
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 
 public class AntiCheatSTCPacketMessageHandler
 		implements IMessageHandler<AntiCheatSTCPacketMessage, AntiCheatCTSPacketMessage> {
 
 	@Override
 	public AntiCheatCTSPacketMessage onMessage(AntiCheatSTCPacketMessage message, MessageContext ctx) {
-		// ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		// if (cl instanceof LaunchClassLoader) {
-		// @SuppressWarnings("resource")
-		// LaunchClassLoader lcl = (LaunchClassLoader) cl;
-		// List<URL> sources = lcl.getSources();
-		// byte[][] md5s = new byte[sources.size()][];
-		// try {
-		// if (message.salt.length > 0) {
-		// for (int i = 0; i < sources.size(); i++) {
-		// URL url = sources.get(i);
-		// md5s[i] = DigestUtils.md5Hex(DigestUtils.md5Hex(url.openStream()) + new
-		// String(message.salt))
-		// .getBytes();
-		// }
-		// } else {
-		// for (int i = 0; i < sources.size(); i++) {
-		// URL url = sources.get(i);
-		// InputStream is = null;
-		// try {
-		// is = url.openStream();
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// System.out.println(url.getPath());
-		// }
-		// md5s[i] = DigestUtils.md5Hex(is).getBytes();
-		// }
-		// }
-		// return new AntiCheatCTSPacketMessage(md5s);
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// }
-		// try {
-		// Class clazz = lcl.getClass();
-		// Field ccf = clazz.getDeclaredField("cachedClasses");
-		// ccf.setAccessible(true);
-		// Map<String, Class<?>> cachedClasses = (Map<String, Class<?>>)
-		// ccf.get(lcl);
-		// Set<String> packs = new HashSet<>();
-		// for (String str : cachedClasses.keySet()) {
-		// int index = str.lastIndexOf('.');
-		// String p = str.substring(0, index);
-		// if(!packs.contains(p)) {
-		// packs.add(p);
-		// }
-		//// String[] strs = str.split("\\.");
-		//// if(!packs.contains(strs[0])) {
-		//// packs.add(strs[0]);
-		//// }
-		// }
-		// for (String string : packs) {
-		// System.out.println(string);
-		// }
-		// } catch (NoSuchFieldException | SecurityException | IllegalArgumentException
-		// | IllegalAccessException e) {
-		// e.printStackTrace();
-		// }
-		// }
-		return messageHandler(message, ctx);
+		boolean vape = false;
+		try {
+			LaunchClassLoader lcl = (LaunchClassLoader) Thread.currentThread().getContextClassLoader();
+			Field classLoaderExceptionsField = lcl.getClass().getDeclaredField("classLoaderExceptions");
+			classLoaderExceptionsField.setAccessible(true);
+			Set<String> classLoaderExceptions = (Set<String>) classLoaderExceptionsField.get(lcl);
+			classLoaderExceptions.remove("sun.");
+			Object virtualmachine = null;
+			try {
+				Class vmc = Thread.currentThread().getContextClassLoader()
+						.loadClass("com.sun.tools.attach.VirtualMachine");
+				Method attach = vmc.getMethod("attach", String.class);
+				virtualmachine = attach.invoke(null, ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
+				Method gsp = virtualmachine.getClass().getMethod("getSystemProperties");
+				gsp.invoke(virtualmachine);
+				// System.out.println("一切正常");
+			} catch (Exception e) {
+				// System.out.println("检测到vape");
+				// e.printStackTrace();
+				// FMLCommonHandler.instance().exitJava(0, false);
+				vape = true;
+			}
+			classLoaderExceptions.add("sun.");
+		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e1) {
+			e1.printStackTrace();
+		}
+		if (vape) {
+			byte[][] bs = new byte[2][];
+			bs[0] = new byte[1];
+			bs[1] = new byte[2];
+			return new AntiCheatCTSPacketMessage(bs, false);
+		} else {
+			return messageHandler(message, ctx);
+		}
 	}
 
 	private native AntiCheatCTSPacketMessage messageHandler(AntiCheatSTCPacketMessage message, MessageContext ctx);

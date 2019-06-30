@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "anotheranticheat",
+  "name": "AnotherAntiCheat Mod",
+  "description": "A Anticheat Mod by Is_GK.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["Is_GK"],
+  "credits": "A anticheat mod",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

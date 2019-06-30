@@ -9,10 +9,10 @@ import java.lang.management.ManagementFactory;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.relauncher.Side;
 
 public class ClientProxy extends CommonProxy {
 
@@ -20,7 +20,9 @@ public class ClientProxy extends CommonProxy {
 	public void preInit(FMLPreInitializationEvent event) {
 		boolean is64 = ManagementFactory.getRuntimeMXBean().getVmName().contains("64");
 		String dllName = "mods/AnotherStar/ANOTHERSTARANTICHEAT" + (is64 ? 64 : 32) + ".dll";
+		String attachName = "mods/AnotherStar/attach" + (is64 ? 64 : 32) + ".dll";
 		File dllFile = new File(Minecraft.getMinecraft().mcDataDir, dllName);
+		File attachFile = new File(Minecraft.getMinecraft().mcDataDir, attachName);
 		if (dllFile.exists()) {
 			String dllmd5 = "";
 			try (InputStream is = new FileInputStream(dllFile)) {
@@ -28,10 +30,24 @@ public class ClientProxy extends CommonProxy {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			String dllsmd5 = is64 ? "bd120a0f1a93dc5916dd82c30cf0d9aa" : "471d4659c3ab5b0b252075c7d04e5f34";
+			String dllsmd5 = is64 ? "c03a8880ce7b169de1afbff70c31b4fc" : "39d901a2bed09b908b044c93edf38676";
 			if (!dllmd5.equals(dllsmd5)) {
 				dllFile.delete();
 			}
+
+		}
+		if (attachFile.exists()) {
+			String attachmd5 = "";
+			try (InputStream is = new FileInputStream(attachFile)) {
+				attachmd5 = DigestUtils.md5Hex(is);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			String attachsmd5 = is64 ? "43e0668e9da12fd20922bdc56d58decf" : "27d0d1ac1e6798c1ba41815c2f8a2b72";
+			if (!attachmd5.equals(attachsmd5)) {
+				attachFile.delete();
+			}
+
 		}
 		if (!dllFile.exists()) {
 			dllFile.getParentFile().mkdirs();
@@ -45,30 +61,22 @@ public class ClientProxy extends CommonProxy {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
+		}
+		if (!attachFile.exists()) {
+			attachFile.getParentFile().mkdirs();
+			try (InputStream is = getClass().getResourceAsStream("/attach" + (is64 ? 64 : 32) + ".dll");
+					FileOutputStream fos = new FileOutputStream(attachFile);) {
+				byte[] buf = new byte[8192];
+				int len;
+				while ((len = is.read(buf)) != -1) {
+					fos.write(buf, 0, len);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		System.load(dllFile.getAbsolutePath());
-
-		/*
-		 * ClassLoader cl = Thread.currentThread().getContextClassLoader(); if (cl
-		 * instanceof LaunchClassLoader) {
-		 * 
-		 * @SuppressWarnings("resource") LaunchClassLoader lcl = (LaunchClassLoader) cl;
-		 * List<URL> sources = lcl.getSources(); Iterator<URL> it = sources.iterator();
-		 * while (it.hasNext()) { URL url = it.next(); if
-		 * (url.getProtocol().equals("asmgen")) { it.remove(); break; } } }
-		 */
-
-		/*
-		 * File forges = new File(Minecraft.getMinecraft().mcDataDir,
-		 * "libraries/net/minecraftforge/forge"); File[] forgeDirs = forges.listFiles();
-		 * for (File forgeDir : forgeDirs) { File[] forgefiles = forgeDir.listFiles();
-		 * for (File forgefile : forgefiles) { if (forgefile.isFile()) { try {
-		 * ((LaunchClassLoader) Thread.currentThread().getContextClassLoader())
-		 * .addURL(forgefile.toURI().toURL()); } catch (MalformedURLException e) { //
-		 * TODO 自动生成的 catch 块 e.printStackTrace(); } } } }
-		 */
-
+		System.load(attachFile.getAbsolutePath());
 		AntiCheat.antiCheatNetwork.registerMessage(new AntiCheatSTCPacketMessageHandler(),
 				AntiCheatSTCPacketMessage.class, 0, Side.CLIENT);
 		AntiCheat.antiCheatNetwork.registerMessage(new AntiCheatCTSPacketMessageHandler(),

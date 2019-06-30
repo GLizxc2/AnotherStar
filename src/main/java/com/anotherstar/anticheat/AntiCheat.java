@@ -1,21 +1,21 @@
 package com.anotherstar.anticheat;
 
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.SidedProxy;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
-@Mod(modid = AntiCheat.MODID, name = AntiCheat.NAME, version = AntiCheat.VERSION)
+@Mod(modid = AntiCheat.MODID, name = AntiCheat.NAME, version = AntiCheat.VERSION, acceptedMinecraftVersions = "1.7.10")
 public class AntiCheat {
 
-	public static final String MODID = "anotherstaranticheat";
-	public static final String NAME = "AnotherStarAntiCheat Mod";
-	public static final String VERSION = "beta-1.0.10";
+	public static final String MODID = "anotheranticheat";
+	public static final String NAME = "AnotherAntiCheat Mod";
+	public static final String VERSION = "2.0.0";
 
 	@SidedProxy(clientSide = "com.anotherstar.anticheat.ClientProxy", serverSide = "com.anotherstar.anticheat.CommonProxy")
 	public static CommonProxy proxy;
